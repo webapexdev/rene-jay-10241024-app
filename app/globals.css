@@ -1,26 +1,136 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@custom-variant dark (&:is(.dark *));
 
 @theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-brand: var(--brand);
+  --color-brand-foreground: var(--brand-foreground);
+  --color-brand-soft: var(--brand-soft);
+  --color-logo: var(--logo);
+  --color-logo-dark: var(--logo-dark);
+  --font-display: var(--font-nunito), ui-sans-serif, system-ui, sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
+:root {
+  --radius: 0.5rem;
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.2 0.05 280);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.2 0.05 280);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.2 0.05 280);
+  --primary: oklch(0.72 0.12 80);
+  --primary-foreground: oklch(1 0 0);
+  --brand: oklch(0.72 0.12 80);
+  --brand-foreground: oklch(1 0 0);
+  --brand-soft: oklch(0.97 0.04 85);
+  --secondary: oklch(0.97 0.01 280);
+  --secondary-foreground: oklch(0.2 0.05 280);
+  --muted: oklch(0.97 0.01 280);
+  --muted-foreground: oklch(0.5 0.03 280);
+  --accent: oklch(0.97 0.04 85);
+  --accent-foreground: oklch(0.45 0.13 80);
+  --destructive: oklch(0.6 0.22 27);
+  --destructive-foreground: oklch(1 0 0);
+  --border: oklch(0.9 0.01 280);
+  --input: oklch(0.9 0.01 280);
+  --ring: oklch(0.72 0.12 80);
+  /* Logo purple — hex fallback for browsers without oklch */
+  --logo: #6b5cad;
+  --logo-dark: #4a3d85;
+}
+
+@supports (color: oklch(0 0 0)) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --logo: oklch(0.45 0.18 285);
+    --logo-dark: oklch(0.35 0.15 285);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-display);
+  }
+  h1,
+  h2,
+  h3,
+  h4 {
+    color: oklch(0.25 0.08 285);
+  }
+}
+
+@layer utilities {
+  .field-label {
+    @apply text-xs font-semibold text-muted-foreground uppercase tracking-wide;
+  }
+
+  /* Date: hide native picker icon in Chrome, Safari, Edge, and Firefox */
+  .hide-native-date-picker-icon {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: textfield;
+  }
+
+  .hide-native-date-picker-icon::-webkit-calendar-picker-indicator {
+    display: none;
+    -webkit-appearance: none;
+  }
+
+  .hide-native-date-picker-icon::-moz-calendar-picker-indicator {
+    display: none;
+  }
+
+  /*
+   * Time: hide native icon in WebKit only.
+   * Firefox breaks type="time" when -moz-appearance:textfield or when the
+   * moz calendar indicator is hidden — showPicker() and click() both fail.
+   */
+  .hide-native-time-picker-icon {
+    -webkit-appearance: none;
+  }
+
+  .hide-native-time-picker-icon::-webkit-calendar-picker-indicator {
+    display: none;
+    -webkit-appearance: none;
+  }
+
+  .hide-native-time-picker-icon::-webkit-inner-spin-button {
+    display: none;
+  }
+
+  .text-logo {
+    color: var(--logo);
+  }
+
+  .text-logo-dark {
+    color: var(--logo-dark);
+  }
 }
