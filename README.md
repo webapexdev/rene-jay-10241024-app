@@ -47,7 +47,7 @@ Both keys come from [Google Cloud Console](https://console.cloud.google.com/). Y
 
 ```
 http://localhost:3000/*
-https://rene-Boundless-Limousine-app.vercel.app/*
+https://rene-boundless-limousine-app.vercel.app/*
 ```
 
 Enable **Maps JavaScript API** and **Places API (New)** on that key.
