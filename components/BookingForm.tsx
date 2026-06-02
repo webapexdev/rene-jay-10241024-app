@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
-import { z } from "zod";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowRight,
   Hourglass,
@@ -13,22 +12,14 @@ import {
   Gauge,
 } from "lucide-react";
 import { Field } from "@/components/Field";
-import {
-  PlaceAutocomplete,
-  type PlaceValue,
-} from "@/components/PlaceAutocomplete";
+import { PlaceAutocomplete } from "@/components/PlaceAutocomplete";
 import { Toggle } from "@/components/Toggle";
 import { UsFlag } from "@/components/UsFlag";
+import { ContactSchema } from "@/lib/booking/schemas";
+import type { PlaceKind, PlaceValue, TripType } from "@/lib/booking/types";
+import { usePhoneLookup } from "@/lib/booking/use-phone-lookup";
+import { useRouteEstimate } from "@/lib/booking/use-route-estimate";
 import { openPicker } from "@/lib/open-picker";
-
-type TripType = "one-way" | "hourly";
-type Kind = "location" | "airport";
-
-const ContactSchema = z.object({
-  firstName: z.string().trim().min(1, "Required").max(100),
-  lastName: z.string().trim().min(1, "Required").max(100),
-  email: z.string().trim().email("Invalid email").max(255),
-});
 
 export function BookingForm() {
   const dateInputRef = useRef<HTMLInputElement>(null);
@@ -36,109 +27,32 @@ export function BookingForm() {
   const [trip, setTrip] = useState<TripType>("one-way");
   const [date, setDate] = useState("2023-05-13");
   const [time, setTime] = useState("15:00");
-  const [pickupKind, setPickupKind] = useState<Kind>("location");
+  const [pickupKind, setPickupKind] = useState<PlaceKind>("location");
   const [pickup, setPickup] = useState<PlaceValue | null>(null);
   const [stops, setStops] = useState<Array<PlaceValue | null>>([]);
-  const [dropKind, setDropKind] = useState<Kind>("location");
+  const [dropKind, setDropKind] = useState<PlaceKind>("location");
   const [drop, setDrop] = useState<PlaceValue | null>(null);
 
   const [phone, setPhone] = useState("");
-  const [phoneState, setPhoneState] = useState<
-    | { status: "idle" }
-    | { status: "loading" }
-    | { status: "known"; firstName: string; lastName: string; email: string }
-    | { status: "unknown" }
-  >({ status: "idle" });
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [passengers, setPassengers] = useState("");
 
-  const [route, setRoute] = useState<{
-    distanceMiles: number;
-    durationText: string;
-  } | null>(null);
-  const [routeError, setRouteError] = useState<string | null>(null);
+  const onKnownContact = useCallback(
+    (contact: { firstName: string; lastName: string; email: string }) => {
+      setFirstName(contact.firstName);
+      setLastName(contact.lastName);
+      setEmail(contact.email);
+    },
+    [],
+  );
+  const { phoneState } = usePhoneLookup(phone, onKnownContact);
+  const { route, routeError } = useRouteEstimate(pickup, drop);
+
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
   const [confirmation, setConfirmation] = useState<string | null>(null);
-
-  useEffect(() => {
-    const digits = phone.replace(/[^\d+]/g, "");
-    if (digits.length < 8) {
-      setPhoneState({ status: "idle" });
-      return;
-    }
-    setPhoneState({ status: "loading" });
-    const t = setTimeout(async () => {
-      try {
-        const res = await fetch("/api/lookup-phone", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ phone: digits }),
-        });
-        if (!res.ok) throw new Error("Lookup failed");
-        const data = await res.json();
-        if (data.known) {
-          setPhoneState({
-            status: "known",
-            firstName: data.firstName,
-            lastName: data.lastName,
-            email: data.email,
-          });
-          setFirstName(data.firstName);
-          setLastName(data.lastName);
-          setEmail(data.email);
-        } else {
-          setPhoneState({ status: "unknown" });
-        }
-      } catch {
-        setPhoneState({ status: "unknown" });
-      }
-    }, 400);
-    return () => clearTimeout(t);
-  }, [phone]);
-
-  useEffect(() => {
-    if (!pickup || !drop) {
-      setRoute(null);
-      setRouteError(null);
-      return;
-    }
-    let cancelled = false;
-    (async () => {
-      try {
-        const res = await fetch("/api/compute-route", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            originPlaceId: pickup.placeId,
-            destinationPlaceId: drop.placeId,
-          }),
-        });
-        if (!res.ok) {
-          const err = await res.json();
-          throw new Error(err.error ?? "Route computation failed");
-        }
-        const r = await res.json();
-        if (!cancelled) {
-          setRoute({
-            distanceMiles: r.distanceMiles,
-            durationText: r.durationText,
-          });
-          setRouteError(null);
-        }
-      } catch (e) {
-        if (!cancelled) {
-          setRoute(null);
-          setRouteError((e as Error).message);
-        }
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [pickup, drop]);
 
   const greeting = useMemo(() => {
     if (phoneState.status === "known")
@@ -298,7 +212,7 @@ export function BookingForm() {
                   { value: "airport", label: "Airport" },
                 ]}
                 value={pickupKind}
-                onChange={(v) => setPickupKind(v as Kind)}
+                onChange={(v) => setPickupKind(v as PlaceKind)}
               />
             </div>
             <div className="mt-3">
@@ -355,7 +269,7 @@ export function BookingForm() {
                 { value: "airport", label: "Airport" },
               ]}
               value={dropKind}
-              onChange={(v) => setDropKind(v as Kind)}
+              onChange={(v) => setDropKind(v as PlaceKind)}
             />
             <div className="mt-3">
               <PlaceAutocomplete
@@ -373,7 +287,7 @@ export function BookingForm() {
             <div className="rounded-md border border-brand/30 bg-brand-soft px-4 py-3 text-sm">
               {route ? (
                 <span>
-                  <strong>{route.distanceMiles} mi</strong> · approx{" "}
+                  <strong>{route.distanceMiles} mi</strong> - approx{" "}
                   <strong>{route.durationText}</strong> driving
                 </span>
               ) : (
@@ -399,7 +313,7 @@ export function BookingForm() {
               />
             </Field>
             {phoneState.status === "loading" && (
-              <p className="mt-2 text-xs text-muted-foreground">Checking…</p>
+              <p className="mt-2 text-xs text-muted-foreground">Checking...</p>
             )}
             {phoneState.status === "unknown" && (
               <>
@@ -493,7 +407,7 @@ export function BookingForm() {
             disabled={submitting}
             className="w-full rounded-md bg-brand py-3 text-base font-semibold text-brand-foreground shadow-sm transition hover:brightness-95 disabled:opacity-60"
           >
-            {submitting ? "Submitting…" : "Continue"}
+            {submitting ? "Submitting..." : "Continue"}
           </button>
         </form>
       </main>

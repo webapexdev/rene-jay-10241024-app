@@ -58,7 +58,7 @@
   --border: oklch(0.9 0.01 280);
   --input: oklch(0.9 0.01 280);
   --ring: oklch(0.72 0.12 80);
-  /* Logo purple — hex fallback for browsers without oklch */
+  /* Logo purple - hex fallback for browsers without oklch */
   --logo: #6b5cad;
   --logo-dark: #4a3d85;
 }
@@ -111,7 +111,7 @@
   /*
    * Time: hide native icon in WebKit only.
    * Firefox breaks type="time" when -moz-appearance:textfield or when the
-   * moz calendar indicator is hidden — showPicker() and click() both fail.
+   * moz calendar indicator is hidden - showPicker() and click() both fail.
    */
   .hide-native-time-picker-icon {
     -webkit-appearance: none;

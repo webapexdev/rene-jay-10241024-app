@@ -1,4 +1,7 @@
-import { z } from "zod";
+import type { z } from "zod";
+import { LookupPhoneInput } from "@/lib/booking/schemas";
+
+export { LookupPhoneInput } from "@/lib/booking/schemas";
 
 const KNOWN_PHONES: Record<
   string,
@@ -15,14 +18,6 @@ const KNOWN_PHONES: Record<
     email: "john@example.com",
   },
 };
-
-export const LookupPhoneInput = z.object({
-  phone: z
-    .string()
-    .min(7)
-    .max(20)
-    .regex(/^[+0-9 ()-]+$/),
-});
 
 export const lookupPhone = async (
   data: z.infer<typeof LookupPhoneInput>,

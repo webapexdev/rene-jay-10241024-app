@@ -1,4 +1,7 @@
-import { z } from "zod";
+import type { z } from "zod";
+import { ComputeRouteInput } from "@/lib/booking/schemas";
+
+export { ComputeRouteInput } from "@/lib/booking/schemas";
 
 const GOOGLE_ROUTES_URL =
   "https://routes.googleapis.com/directions/v2:computeRoutes";
@@ -22,11 +25,6 @@ const parseRouteResponse = (json: {
     durationText: formatDuration(seconds),
   };
 };
-
-export const ComputeRouteInput = z.object({
-  originPlaceId: z.string().min(1).max(255),
-  destinationPlaceId: z.string().min(1).max(255),
-});
 
 export const computeRoute = async (
   data: z.infer<typeof ComputeRouteInput>,

@@ -2,12 +2,8 @@
 
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { OutlinedFieldShell } from "@/components/Field";
+import type { PlaceValue } from "@/lib/booking/types";
 import { loadGoogleMaps } from "@/lib/google-maps";
-
-export interface PlaceValue {
-  placeId: string;
-  address: string;
-}
 
 interface Props {
   value: PlaceValue | null;
