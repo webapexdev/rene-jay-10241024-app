@@ -173,7 +173,7 @@ export function BookingForm() {
             <div className="flex flex-col gap-3 sm:flex-row">
               <Field
                 label=""
-                icon={<CalendarIcon className="h-4 w-4" />}
+                icon={<CalendarIcon className="h-4 w-4 text-muted-foreground" />}
                 onIconClick={() => openPicker(dateInputRef.current)}
                 iconAriaLabel="Open date picker"
                 className="min-w-0 flex-1"
@@ -184,12 +184,12 @@ export function BookingForm() {
                   type="date"
                   value={date}
                   onChange={(e) => setDate(e.target.value)}
-                  className="hide-native-date-picker-icon w-full min-w-0 max-w-full bg-transparent text-sm text-brand outline-none"
+                  className="hide-native-date-picker-icon w-full min-w-0 max-w-full bg-transparent text-sm text-muted-foreground outline-none"
                 />
               </Field>
               <Field
                 label=""
-                icon={<Clock className="h-4 w-4" />}
+                icon={<Clock className="h-4 w-4 text-muted-foreground" />}
                 onIconClick={() => openPicker(timeInputRef.current)}
                 iconAriaLabel="Open time picker"
                 className="w-full shrink-0 sm:w-36"
@@ -200,7 +200,7 @@ export function BookingForm() {
                   type="time"
                   value={time}
                   onChange={(e) => setTime(e.target.value)}
-                  className="hide-native-time-picker-icon w-full min-w-0 max-w-full bg-transparent text-sm text-brand outline-none"
+                  className="hide-native-time-picker-icon w-full min-w-0 max-w-full bg-transparent text-sm text-muted-foreground outline-none"
                 />
               </Field>
             </div>
