@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { OutlinedFieldShell } from "@/components/Field";
+import { GoogleMapsPinIcon } from "@/components/GoogleMapsPinIcon";
 import type { PlaceValue } from "@/lib/booking/types";
 import { loadGoogleMaps } from "@/lib/google-maps";
 
@@ -35,12 +36,11 @@ export function PlaceAutocomplete({
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [open, setOpen] = useState(false);
   const [fetching, setFetching] = useState(false);
-  const [mapsError, setMapsError] = useState<string | null>(null);
 
   kindRef.current = kind;
 
   useEffect(() => {
-    loadGoogleMaps().catch((err: Error) => setMapsError(err.message));
+    loadGoogleMaps().catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -113,18 +113,13 @@ export function PlaceAutocomplete({
   };
 
   const showList = open && suggestions.length > 0;
-  const fieldError = error || mapsError;
 
   return (
     <div className={`relative ${label ? "mt-1" : ""}`}>
       <OutlinedFieldShell
         label={label}
-        icon={
-          <span aria-hidden="true" className="text-base leading-none">
-            📍
-          </span>
-        }
-        error={!!fieldError}
+        icon={<GoogleMapsPinIcon />}
+        error={!!error}
       >
         <input
           ref={inputRef}
@@ -137,18 +132,15 @@ export function PlaceAutocomplete({
           onBlur={() => setTimeout(() => setOpen(false), 150)}
           placeholder={placeholder}
           autoComplete="off"
-          disabled={!!mapsError}
           aria-autocomplete="list"
           aria-expanded={showList}
           aria-controls={showList ? listboxId : undefined}
           aria-busy={fetching}
-          className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground disabled:opacity-60"
+          className="w-full bg-transparent text-sm text-brand outline-none placeholder:text-muted-foreground"
         />
       </OutlinedFieldShell>
-      {fieldError && (
-        <p className="mt-1 text-xs text-destructive" role="alert">
-          {fieldError}
-        </p>
+      {error && (
+        <p className="mt-1 text-xs text-destructive">{error}</p>
       )}
       {showList && (
         <ul
